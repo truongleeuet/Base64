@@ -1,4 +1,5 @@
 var express = require('express');
+var http    = require('http');
 var bodyParser = require('body-parser')
 var app = express();
 var fs = require('fs');
@@ -8,8 +9,11 @@ var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 var admZip = require('adm-zip');
 var flatten = require('./node_modules/adobe-edge-animate-image-flatten/index.js');
+var easy = require('./node_modules/easy-zip2/easy-zip');
 var glob = require('glob');
 var globule = require('globule');
+var ZipZipTop = require("zip-zip-top");
+var EasyZip = require('easy-zip2').EasyZip;
 
 //console.log(flatten);
 app.use(bodyParser.urlencoded({
@@ -48,7 +52,8 @@ app.post('/upload', multipartMiddleware, function (req, res, next) {
 
                 // Return anh vua upload
                 //res.send('<img src="/pictures/' + originalFilename +'" />');
-                res.send('Upload Sucessfull');
+                //res.send('Upload Sucessfull');
+                //alert("Upload Sucessfull");
                 return;
             });
         } else {
@@ -96,17 +101,51 @@ app.post('/upload', multipartMiddleware, function (req, res, next) {
             console.log("Done");
 
         });
-    var ziper = new admZip();
-    console.log(("/upload/publish"));
-   // ziper.addLocalFolder( path.resolve("./upload/publish/"));
-    ziper.addLocalFile("./upload/publish/web/Budweiser_980x250.html");
-    ziper.addLocalFile("./upload/publish/web/Budweiser_980x250_edge.js");
-    ziper.addLocalFile("./upload/publish/web/Budweiser_980x250_edgeActions.js");
-    ziper.addLocalFile("./upload/publish/web/Budweiser_980x250_edgePreload.js");
+   // var ziper = new admZip();
+   // console.log(("/upload/publish"));
+   //// ziper.addLocalFolder( path.resolve("./upload/publish/"));
+   // console.log(path.resolve(__dirname, "./upload/publish/web/Budweiser_980x250.html"));
+   // ziper.addLocalFile(path.resolve(__dirname, "./upload/publish/web/Budweiser_980x250.html"));
+   // ziper.addLocalFile(path.resolve(__dirname, "./upload/publish/web/Budweiser_980x250_edge.js"));
+   // ziper.addLocalFile(path.resolve(__dirname, "./upload/publish/web/Budweiser_980x250_edgeActions.js"));
+   // ziper.addLocalFile(path.resolve(__dirname, "./upload/publish/web/Budweiser_980x250_edgePreload.js"));
+   // console.log("zipper = " + ziper.toString());
+   //
+   // //console.log(ziper.entries);
+   // var zipEntries = ziper.getEntries(); // an array of ZipEntry records
+   //
+   // zipEntries.forEach(function(zipEntry) {
+   //     console.log(zipEntry.toString()); // outputs zip entries information
+   // });
 
-    var willSendthis = ziper.toBuffer();
-    ziper.writeZip("./download/publish.zip");
+    //var ziper = new ZipZipTop();
+    //console.log(ziper);
+    //ziper.addFile("./upload/publish/web/Budweiser_980x250.html", "./upload/publish/web/Budweiser_980x250_edge.js", "./upload/publish/web/Budweiser_980x250_edgeActions.js", "./upload/publish/web/Budweiser_980x250_edgePreload.js",
+    //    function(err){
+    //        if(err) {
+    //            console.log(err);
+    //        }
+    //        ziper.writeToFile("./download/file.zip");
+    //    });
+    //var willSendthis = ziper.toBuffer();
+    //ziper.writeZip(path.resolve(__dirname, "./download/publish.zip"));
+    var zip3 = new EasyZip();
+    zip3.addFile('./upload/publish/web/Budweiser_980x250.html','./node_modules/easy-zip2/easy-zip.js', function(err) {
+        if(!err){
+            zip3.writeToFile('./download/file.zip');
+        }
+
+    });
+    res.send("Upload sucessfull");
 });
+app.post('/download', function (req, res, next){
+   // res.send("Download Start");
+    var file = path.resolve(__dirname, './download/publish.zip');
+    var filename = path.basename(file);
+    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 
+    console.log(file);
+    res.download(file);
+});
 server.listen(6789);
 console.log('Server runing port 6789');
